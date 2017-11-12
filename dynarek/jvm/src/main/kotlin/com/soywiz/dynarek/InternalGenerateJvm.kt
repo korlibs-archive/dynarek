@@ -1,6 +1,7 @@
 package com.soywiz.dynarek
 
 import org.objectweb.asm.ClassWriter
+import org.objectweb.asm.Label
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes.*
 import org.objectweb.asm.Type
@@ -54,7 +55,11 @@ fun MethodVisitor._visitTypeInsn(opcode: Int, type: String): Unit {
 
 fun MethodVisitor._visitLdcInsn(cst: Any?): Unit {
 	log { "visitLdcInsn($cst)" }
-	visitLdcInsn(cst)
+	if (cst is Boolean) {
+		visitLdcInsn(if (cst) 1 else 0)
+	} else {
+		visitLdcInsn(cst)
+	}
 }
 
 fun MethodVisitor._visitMethodInsn(opcode: Int, owner: String, name: String, desc: String, itf: Boolean): Unit {
@@ -103,10 +108,8 @@ fun MethodVisitor.visit(expr: DExpr<*>): Unit = when (expr) {
 	is DLiteral<*> -> {
 		val value = expr.value
 		when (value) {
-			is Int -> {
-				//_visitInsn(ICONST_1)
-				_visitLdcInsn(value)
-			}
+			is Int -> _visitLdcInsn(value)
+			is Boolean -> _visitLdcInsn(value)
 			else -> TODO("MethodVisitor.visit: $expr")
 		}
 	}
@@ -128,6 +131,36 @@ fun MethodVisitor.visit(stm: DStm): Unit = when (stm) {
 	}
 	is DStms -> {
 		for (s in stm.stms) visit(s)
+	}
+	is DIfElse -> {
+		val cond = stm.cond
+		val strue = stm.strue
+		val sfalse = stm.sfalse
+
+		if (sfalse == null) {
+			// IF
+			val endLabel = Label()
+			visit(cond)
+			visitJumpInsn(IFEQ, endLabel)
+			visit(strue)
+			visitLabel(endLabel)
+		} else {
+			// IF+ELSE
+			val elseLabel = Label()
+			val endLabel = Label()
+
+			visit(cond)
+			visitJumpInsn(IFEQ, elseLabel)
+
+			visit(strue)
+			visitJumpInsn(GOTO, endLabel)
+
+			visitLabel(elseLabel)
+			visit(sfalse)
+
+			visitLabel(endLabel)
+		}
+		Unit
 	}
 	else -> TODO("MethodVisitor.visit: $stm")
 }
