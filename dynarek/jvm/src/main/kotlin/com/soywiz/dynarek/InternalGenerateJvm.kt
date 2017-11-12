@@ -111,9 +111,31 @@ fun MethodVisitor.visit(expr: DExpr<*>): Unit = when (expr) {
 		visit(expr.right)
 		when (expr.op) {
 			"+" -> _visitInsn(IADD)
+			"-" -> _visitInsn(ISUB)
 			"*" -> _visitInsn(IMUL)
 			else -> TODO("Unsupported operator ${expr.op}")
 		}
+	}
+	is DBinopIntBool -> {
+		visit(expr.left)
+		visit(expr.right)
+		val opcode = when (expr.op) {
+			"==" -> IF_ICMPEQ
+			"!=" -> IF_ICMPNE
+			">=" -> IF_ICMPGE
+			">" -> IF_ICMPGT
+			"<=" -> IF_ICMPLE
+			"<" -> IF_ICMPLT
+			else -> TODO("Unsupported operator ${expr.op}")
+		}
+		val label1 = Label()
+		val label2 = Label()
+		visitJumpInsn(opcode, label1)
+		_visitLdcInsn(true)
+		visitJumpInsn(GOTO, label2)
+		visitLabel(label1)
+		_visitLdcInsn(false)
+		visitLabel(label2)
 	}
 	is DFieldAccess<*, *> -> {
 		visit(expr.obj)
@@ -191,6 +213,16 @@ fun MethodVisitor.visit(stm: DStm): Unit = when (stm) {
 			visitLabel(endLabel)
 		}
 		Unit
+	}
+	is DWhile -> {
+		val startLabel = Label()
+		val endLabel = Label()
+		visitLabel(startLabel)
+		visit(stm.cond)
+		visitJumpInsn(IFNE, endLabel)
+		visit(stm.block)
+		visitJumpInsn(GOTO, startLabel)
+		visitLabel(endLabel)
 	}
 	else -> TODO("MethodVisitor.visit: $stm")
 }

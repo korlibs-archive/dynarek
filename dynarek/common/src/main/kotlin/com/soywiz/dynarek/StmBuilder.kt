@@ -30,13 +30,12 @@ class StmBuilder<TRet : Any, T0 : Any, T1 : Any>(val ret: KClass<TRet>, val t0: 
 	operator fun DExpr<Int>.minus(that: DExpr<Int>) = DBinopInt(this, "-", that)
 	operator fun DExpr<Int>.times(that: DExpr<Int>) = DBinopInt(this, "*", that)
 
-	operator fun Int.plus(that: DExpr<Int>) = DBinopInt(this.lit, "+", that)
-	operator fun Int.minus(that: DExpr<Int>) = DBinopInt(this.lit, "-", that)
-	operator fun Int.times(that: DExpr<Int>) = DBinopInt(this.lit, "*", that)
-
-	operator fun DExpr<Int>.plus(that: Int) = DBinopInt(this, "+", that.lit)
-	operator fun DExpr<Int>.minus(that: Int) = DBinopInt(this, "-", that.lit)
-	operator fun DExpr<Int>.times(that: Int) = DBinopInt(this, "*", that.lit)
+	infix fun DExpr<Int>.eq(that: DExpr<Int>) = DBinopIntBool(this, "==", that)
+	infix fun DExpr<Int>.ne(that: DExpr<Int>) = DBinopIntBool(this, "!=", that)
+	infix fun DExpr<Int>.ge(that: DExpr<Int>) = DBinopIntBool(this, ">=", that)
+	infix fun DExpr<Int>.le(that: DExpr<Int>) = DBinopIntBool(this, "<=", that)
+	infix fun DExpr<Int>.gt(that: DExpr<Int>) = DBinopIntBool(this, ">", that)
+	infix fun DExpr<Int>.lt(that: DExpr<Int>) = DBinopIntBool(this, "<", that)
 
 	inline operator fun <reified T : Any, TR> DExpr<T>.get(prop: KMutableProperty1<T, TR>): DFieldAccess<T, TR> = DFieldAccess(T::class, this, prop)
 
@@ -52,6 +51,12 @@ class StmBuilder<TRet : Any, T0 : Any, T1 : Any>(val ret: KClass<TRet>, val t0: 
 	inline operator fun <reified TThis : Any, T1 : Any, TR : Any> KFunction2<TThis, T1, TR>.invoke(p0: DExpr<TThis>, p1: DExpr<T1>): DExpr<TR> = DExprInvoke2<TThis, T1, TR>(TThis::class, this, p0, p1)
 	inline operator fun <reified TThis : Any, T1 : Any, T2 : Any, TR : Any> KFunction3<TThis, T1, T2, TR>.invoke(p0: DExpr<TThis>, p1: DExpr<T1>, p2: DExpr<T2>): DExpr<TR> = DExprInvoke3<TThis, T1, T2, TR>(TThis::class, this, p0, p1, p2)
 
+	fun (StmBuilder<TRet, T0, T1>.() -> Unit).build(): DStm {
+		val builder = createBuilder()
+		this(builder)
+		return builder.build()
+	}
+
 	fun IF(cond: Boolean, block: StmBuilder<TRet, T0, T1>.() -> Unit): ElseBuilder = IF(cond.lit, block)
 
 	fun IF(cond: DExpr<Boolean>, block: StmBuilder<TRet, T0, T1>.() -> Unit): ElseBuilder {
@@ -62,5 +67,11 @@ class StmBuilder<TRet : Any, T0 : Any, T1 : Any>(val ret: KClass<TRet>, val t0: 
 		return ElseBuilder(ifElse)
 	}
 
+	fun WHILE(cond: DExpr<Boolean>, block: StmBuilder<TRet, T0, T1>.() -> Unit): Unit {
+		stms.add(DWhile(cond, block.build()))
+	}
+
 	fun build(): DStm = DStms(stms.toList())
 }
+
+//typealias StmBuilderBlock<TRet, T0, T1> = StmBuilder<TRet, T0, T1>.() -> Unit

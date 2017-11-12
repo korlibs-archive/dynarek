@@ -5,6 +5,7 @@ val <T> DExpr<T>.str: String
 		is DLiteral<*> -> "$value"
 		is DArg<*> -> "p$index"
 		is DBinopInt -> "((${left.str} $op ${right.str})|0)"
+		is DBinopIntBool -> "((${left.str} $op ${right.str}))"
 		is DFieldAccess<*, *> -> "${obj.str}.${prop.name}"
 		is DExprInvoke<*, *> -> {
 			val obj = this.args.first()
@@ -42,6 +43,12 @@ fun DStm.genJs(w: StringBuilder): Unit = when (this) {
 			sfalse?.genJs(w)
 			w.append("}")
 		}
+		Unit
+	}
+	is DWhile -> {
+		w.append("while (${cond.str}) {")
+		block.genJs(w)
+		w.append("}")
 		Unit
 	}
 	else -> TODO("Unhandled.DStm.genJs: $this")

@@ -24,6 +24,7 @@ interface DExpr<T> : DNode
 data class DLiteral<T>(val value: T) : DExpr<T>
 data class DArg<T : Any>(val clazz: KClass<T>, val index: Int) : DExpr<T>
 data class DBinopInt(val left: DExpr<Int>, val op: String, val right: DExpr<Int>) : DExpr<Int>
+data class DBinopIntBool(val left: DExpr<Int>, val op: String, val right: DExpr<Int>) : DExpr<Boolean>
 
 interface DExprInvoke<TThis : Any, TR : Any> : DExpr<TR> {
 	val clazz: KClass<TThis>
@@ -56,4 +57,5 @@ data class DAssign<T>(val left: DRef<T>, val value: DExpr<T>) : DStm
 data class DStmExpr(val expr: DExpr<*>) : DStm
 
 data class DIfElse(val cond: DExpr<Boolean>, val strue: DStm, var sfalse: DStm? = null) : DStm
+data class DWhile(val cond: DExpr<Boolean>, val block: DStm) : DStm
 

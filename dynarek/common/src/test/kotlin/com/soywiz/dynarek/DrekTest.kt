@@ -16,10 +16,13 @@ class DrekTest {
 		assertEquals(20, state.a)
 	}
 
+	//fun testWithState(state: State): State {
+	//}
+
 	@Test
 	fun testDynarek() {
 		val function = function(DClass(State::class), DINT, DVOID) {
-			SET(p0[State::a], p0[State::a] + 4 * p1)
+			SET(p0[State::a], p0[State::a] + 4.lit * p1)
 		}
 		val state = State(a = 7)
 		val func = function.generateDynarek()
@@ -32,19 +35,19 @@ class DrekTest {
 	fun testDynarek2() {
 		val function = function(DClass(State::class), DINT, DVOID) {
 			IF(true) {
-				SET(p0[State::a], p0[State::a] + 7 * p1)
+				SET(p0[State::a], p0[State::a] + 7.lit * p1)
 			}
 
 			IF(true) {
-				SET(p0[State::a], p0[State::a] + 4 * p1)
+				SET(p0[State::a], p0[State::a] + 4.lit * p1)
 			} ELSE {
-				SET(p0[State::a], 9 * p1)
+				SET(p0[State::a], 9.lit * p1)
 			}
 
 			IF(false) {
-				SET(p0[State::a], p0[State::a] + 4 * p1)
+				SET(p0[State::a], p0[State::a] + 4.lit * p1)
 			} ELSE {
-				SET(p0[State::a], p0[State::a] + 11 * p1)
+				SET(p0[State::a], p0[State::a] + 11.lit * p1)
 			}
 		}
 		val state = State(a = 7)
@@ -85,5 +88,19 @@ class DrekTest {
 		function.generateDynarek()(state, 3)
 
 		assertEquals(7 * 3 * (11 + 9), state.a)
+	}
+
+	@Test
+	fun testWhile() {
+		val function = function(DClass(State::class), DINT, DVOID) {
+			WHILE(p0[State::b] gt 0.lit) {
+				SET(p0[State::a], p0[State::a] + 1.lit)
+				SET(p0[State::b], p0[State::b] - 1.lit)
+			}
+		}
+		val state = State(a = 7, b = 3)
+		function.generateDynarek()(state, 3)
+
+		assertEquals(7 + 3, state.a)
 	}
 }
