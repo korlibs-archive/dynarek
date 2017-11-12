@@ -1,6 +1,7 @@
 package com.soywiz.dynarek
 
 import kotlin.reflect.KClass
+import kotlin.reflect.KFunction1
 import kotlin.reflect.KMutableProperty1
 
 interface DNode
@@ -21,15 +22,18 @@ interface DExpr<T> : DNode
 data class DLiteral<T>(val value: T) : DExpr<T>
 data class DArg<T : Any>(val clazz: KClass<T>, val index: Int) : DExpr<T>
 data class DBinopInt(val left: DExpr<Int>, val op: String, val right: DExpr<Int>) : DExpr<Int>
+data class DExprInvoke<T : Any, TR : Any>(val clazz: KClass<T>, val func: KFunction1<T, TR>, val p0: DExpr<T>) : DExpr<TR>
 
 interface DRef<T> : DNode
 data class DFieldAccess<T : Any, TR>(val clazz: KClass<T>, val obj: DExpr<T>, val prop: KMutableProperty1<T, TR>) : DExpr<TR>, DRef<TR>
+//data class DInstanceMethod1<T : Any, TR>(val clazz: KClass<T>, val obj: DExpr<T>, val prop: KFunction1<T, TR>)
 
 interface DStm : DNode
 data class DStms(val stms: List<DStm>) : DStm
 data class DReturnExpr<T>(val expr: DExpr<T>) : DStm
 data class DReturnVoid(val dummy: Boolean) : DStm
 data class DAssign<T>(val left: DRef<T>, val value: DExpr<T>) : DStm
+data class DStmExpr(val expr: DExpr<*>) : DStm
 
 data class DIfElse(val cond: DExpr<Boolean>, val strue: DStm, var sfalse: DStm? = null) : DStm
 

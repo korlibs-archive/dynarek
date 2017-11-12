@@ -6,12 +6,19 @@ val <T> DExpr<T>.str: String
 		is DArg<*> -> "p$index"
 		is DBinopInt -> "((${left.str} $op ${right.str})|0)"
 		is DFieldAccess<*, *> -> "${obj.str}.${prop.name}"
+		is DExprInvoke<*, *> -> {
+			//val res = "${this.p0.str}.${this.func.name}()"
+			//println("DExprInvoke: $res")
+			//res
+			"${this.p0.str}.${this.func.name}()"
+		}
 		else -> TODO("Unhandled.DExpr.genJs: $this")
 	}
 
 fun DStm.genJs(w: StringBuilder): Unit = when (this) {
 	is DReturnVoid -> run { w.append("return;"); Unit }
 	is DReturnExpr<*> -> run { w.append("return ${expr.str};"); Unit }
+	is DStmExpr -> run { w.append("${expr.str};"); Unit }
 	is DAssign<*> -> {
 		val l = left
 		val r = value.str

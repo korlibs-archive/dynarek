@@ -1,6 +1,7 @@
 package com.soywiz.dynarek
 
 import kotlin.reflect.KClass
+import kotlin.reflect.KFunction1
 import kotlin.reflect.KMutableProperty1
 
 class StmBuilder<TRet : Any, T0 : Any, T1 : Any>(val ret: KClass<TRet>, val t0: KClass<T0>, val t1: KClass<T1>) {
@@ -37,9 +38,15 @@ class StmBuilder<TRet : Any, T0 : Any, T1 : Any>(val ret: KClass<TRet>, val t0: 
 
 	inline operator fun <reified T : Any, TR> DExpr<T>.get(prop: KMutableProperty1<T, TR>): DFieldAccess<T, TR> = DFieldAccess(T::class, this, prop)
 
+	//inline operator fun <reified T : Any, TR> DExpr<T>.get(func: KFunction1<T, TR>): DInstanceMethod1<T, TR> = DInstanceMethod1(T::class, this, func)
+
 	fun RET(expr: DExpr<TRet>) = stms.add(DReturnExpr(expr))
 	fun RET() = stms.add(DReturnVoid(true))
 	fun <T> SET(ref: DRef<T>, value: DExpr<T>) = stms.add(DAssign(ref, value))
+
+	fun <T> STM(expr: DExpr<T>) = stms.add(DStmExpr(expr))
+
+	inline operator fun <reified T : Any, TR : Any> KFunction1<T, TR>.invoke(p0: DExpr<T>): DExpr<TR> = DExprInvoke<T, TR>(T::class, this, p0)
 
 	fun IF(cond: Boolean, block: StmBuilder<TRet, T0, T1>.() -> Unit): ElseBuilder = IF(cond.lit, block)
 

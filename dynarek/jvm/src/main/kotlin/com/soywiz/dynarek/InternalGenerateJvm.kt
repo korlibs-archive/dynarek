@@ -6,14 +6,28 @@ import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes.*
 import org.objectweb.asm.Type
 import java.lang.reflect.Field
+import java.lang.reflect.Method
 
 var dynarekLastId = 0
+
+val Method.signature: String
+	get() {
+		val args = this.parameterTypes.map { it.internalName2 }.joinToString("")
+		val ret = this.returnType.internalName2
+		return "($args)$ret"
+	}
 
 val Class<*>.internalName: String get() = this.name.replace('.', '/')
 val Class<*>.internalName2: String
 	get() = when {
-		this == java.lang.Integer.TYPE -> "I"
-		this == java.lang.Float.TYPE -> "F"
+		isPrimitive -> {
+			when (this) {
+				java.lang.Void.TYPE -> "V"
+				java.lang.Integer.TYPE -> "I"
+				java.lang.Float.TYPE -> "F"
+				else -> TODO("Unknown primitive $this")
+			}
+		}
 		isArray -> "[" + this.componentType.internalName2
 		else -> "L${this.internalName};"
 	}
@@ -105,6 +119,19 @@ fun MethodVisitor.visit(expr: DExpr<*>): Unit = when (expr) {
 		visit(expr.obj)
 		_visitFieldInsn(GETFIELD, expr.getField())
 	}
+	is DExprInvoke<*, *> -> {
+		val p0 = expr.p0
+		val clazz = expr.clazz.java
+		val func = expr.func
+		visit(p0)
+		val method = clazz.getDeclaredMethod(func.name)
+
+		_visitMethodInsn(INVOKEVIRTUAL, clazz.internalName, method.name, method.signature, false)
+		if (method.returnType == Void.TYPE) {
+			visitInsn(ACONST_NULL)
+		}
+		Unit
+	}
 	is DLiteral<*> -> {
 		val value = expr.value
 		when (value) {
@@ -131,6 +158,10 @@ fun MethodVisitor.visit(stm: DStm): Unit = when (stm) {
 	}
 	is DStms -> {
 		for (s in stm.stms) visit(s)
+	}
+	is DStmExpr -> {
+		visit(stm.expr)
+		visitInsn(POP)
 	}
 	is DIfElse -> {
 		val cond = stm.cond

@@ -53,5 +53,17 @@ class DrekTest {
 
 		assertEquals(73, state.a)
 	}
+
+	@Test
+	fun testDynarekInvokeMethod() {
+		val function = function(DClass(State::class), DINT, DVOID) {
+			val res = State::mulAB
+			STM(State::mulAB.invoke(p0))
+		}
+		val state = State(a = 7, b = 3)
+		function.generateDynarek()(state, 3)
+
+		assertEquals(7 * 3, state.a)
+	}
 }
 
