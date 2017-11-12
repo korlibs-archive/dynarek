@@ -103,4 +103,15 @@ class DrekTest {
 
 		assertEquals(7 + 3, state.a)
 	}
+
+	@Test
+	fun testImult() {
+		val function = function(DClass(State::class), DINT, DVOID) {
+			SET(p0[State::a], (Int.MAX_VALUE - 1).lit * (Int.MAX_VALUE - 2).lit)
+		}
+		val state = State(a = 7, b = 3)
+		function.generateDynarek()(state, 3)
+
+		assertEquals(-2147483642, state.a)
+	}
 }

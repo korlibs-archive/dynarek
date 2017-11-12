@@ -4,7 +4,13 @@ val <T> DExpr<T>.str: String
 	get() = when (this) {
 		is DLiteral<*> -> "$value"
 		is DArg<*> -> "p$index"
-		is DBinopInt -> "((${left.str} $op ${right.str})|0)"
+		is DBinopInt -> {
+			when (op) {
+				"*" -> "Math.imul(${left.str}, ${right.str})"
+				else -> "((${left.str} $op ${right.str})|0)"
+			}
+
+		}
 		is DBinopIntBool -> "((${left.str} $op ${right.str}))"
 		is DFieldAccess<*, *> -> "${obj.str}.${prop.name}"
 		is DExprInvoke<*, *> -> {
