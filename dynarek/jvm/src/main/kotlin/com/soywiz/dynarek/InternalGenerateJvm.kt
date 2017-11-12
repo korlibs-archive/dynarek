@@ -119,12 +119,11 @@ fun MethodVisitor.visit(expr: DExpr<*>): Unit = when (expr) {
 		visit(expr.obj)
 		_visitFieldInsn(GETFIELD, expr.getField())
 	}
-	is DExprInvoke<*, *> -> {
-		val p0 = expr.p0
+	is DExprInvoke<*, *, *> -> {
 		val clazz = expr.clazz.java
-		val func = expr.func
-		visit(p0)
-		val method = clazz.getDeclaredMethod(func.name)
+		val name = expr.name
+		for (arg in expr.args) visit(arg)
+		val method = clazz.declaredMethods.firstOrNull { it.name == name } ?: throw IllegalArgumentException("Can't find method $clazz.$name")
 
 		_visitMethodInsn(INVOKEVIRTUAL, clazz.internalName, method.name, method.signature, false)
 		if (method.returnType == Void.TYPE) {

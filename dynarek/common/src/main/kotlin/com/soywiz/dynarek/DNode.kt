@@ -2,6 +2,7 @@ package com.soywiz.dynarek
 
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction1
+import kotlin.reflect.KFunction2
 import kotlin.reflect.KMutableProperty1
 
 interface DNode
@@ -22,7 +23,21 @@ interface DExpr<T> : DNode
 data class DLiteral<T>(val value: T) : DExpr<T>
 data class DArg<T : Any>(val clazz: KClass<T>, val index: Int) : DExpr<T>
 data class DBinopInt(val left: DExpr<Int>, val op: String, val right: DExpr<Int>) : DExpr<Int>
-data class DExprInvoke<T : Any, TR : Any>(val clazz: KClass<T>, val func: KFunction1<T, TR>, val p0: DExpr<T>) : DExpr<TR>
+
+interface DExprInvoke<TThis : Any, T1: Any, TR : Any> : DExpr<TR> {
+	val clazz: KClass<TThis>
+	val name: String
+	val args: List<DExpr<*>>
+}
+
+data class DExprInvoke1<TThis : Any, TR : Any>(override val clazz: KClass<TThis>, val func: KFunction1<TThis, TR>, val p0: DExpr<TThis>) : DExprInvoke<TThis, Unit, TR> {
+	override val name = func.name
+	override val args = listOf(p0)
+}
+data class DExprInvoke2<TThis : Any, T1: Any, TR : Any>(override val clazz: KClass<TThis>, val func: KFunction2<TThis, T1, TR>, val p0: DExpr<TThis>, val p1: DExpr<T1>) : DExprInvoke<TThis, T1, TR> {
+	override val name = func.name
+	override val args = listOf(p0, p1)
+}
 
 interface DRef<T> : DNode
 data class DFieldAccess<T : Any, TR>(val clazz: KClass<T>, val obj: DExpr<T>, val prop: KMutableProperty1<T, TR>) : DExpr<TR>, DRef<TR>

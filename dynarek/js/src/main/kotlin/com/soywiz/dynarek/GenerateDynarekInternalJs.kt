@@ -6,11 +6,11 @@ val <T> DExpr<T>.str: String
 		is DArg<*> -> "p$index"
 		is DBinopInt -> "((${left.str} $op ${right.str})|0)"
 		is DFieldAccess<*, *> -> "${obj.str}.${prop.name}"
-		is DExprInvoke<*, *> -> {
-			//val res = "${this.p0.str}.${this.func.name}()"
-			//println("DExprInvoke: $res")
-			//res
-			"${this.p0.str}.${this.func.name}()"
+		is DExprInvoke<*, *, *> -> {
+			val obj = this.args.first()
+			val args = this.args.drop(1)
+			val argsSr = args.map { it.str }.joinToString(", ")
+			"${obj.str}.${this.name}($argsSr)"
 		}
 		else -> TODO("Unhandled.DExpr.genJs: $this")
 	}
