@@ -113,6 +113,8 @@ fun MethodVisitor.visit(expr: DExpr<*>): Unit = when (expr) {
 			"+" -> _visitInsn(IADD)
 			"-" -> _visitInsn(ISUB)
 			"*" -> _visitInsn(IMUL)
+			"/" -> _visitInsn(IDIV)
+			"%" -> _visitInsn(IREM)
 			else -> TODO("Unsupported operator ${expr.op}")
 		}
 	}

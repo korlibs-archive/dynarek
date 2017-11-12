@@ -29,6 +29,8 @@ class StmBuilder<TRet : Any, T0 : Any, T1 : Any>(val ret: KClass<TRet>, val t0: 
 	operator fun DExpr<Int>.plus(that: DExpr<Int>) = DBinopInt(this, "+", that)
 	operator fun DExpr<Int>.minus(that: DExpr<Int>) = DBinopInt(this, "-", that)
 	operator fun DExpr<Int>.times(that: DExpr<Int>) = DBinopInt(this, "*", that)
+	operator fun DExpr<Int>.div(that: DExpr<Int>) = DBinopInt(this, "/", that)
+	operator fun DExpr<Int>.rem(that: DExpr<Int>) = DBinopInt(this, "%", that)
 
 	infix fun DExpr<Int>.eq(that: DExpr<Int>) = DBinopIntBool(this, "==", that)
 	infix fun DExpr<Int>.ne(that: DExpr<Int>) = DBinopIntBool(this, "!=", that)

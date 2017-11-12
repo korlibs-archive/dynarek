@@ -114,4 +114,17 @@ class DrekTest {
 
 		assertEquals(-2147483642, state.a)
 	}
+
+	@Test
+	fun testIdiv() {
+		val function = function(DClass(State::class), DINT, DVOID) {
+			SET(p0[State::a], (Int.MAX_VALUE - 1).lit / (Int.MAX_VALUE - 2).lit)
+			SET(p0[State::a], (Int.MAX_VALUE - 1).lit % (Int.MAX_VALUE - 2).lit)
+		}
+		val state = State(a = 7, b = 3)
+		function.generateDynarek()(state, 3)
+
+		assertEquals(1, state.a)
+		assertEquals(3, state.b)
+	}
 }
