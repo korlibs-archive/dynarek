@@ -119,7 +119,7 @@ fun MethodVisitor.visit(expr: DExpr<*>): Unit = when (expr) {
 		visit(expr.obj)
 		_visitFieldInsn(GETFIELD, expr.getField())
 	}
-	is DExprInvoke<*, *, *> -> {
+	is DExprInvoke<*, *> -> {
 		val clazz = expr.clazz.java
 		val name = expr.name
 		for (arg in expr.args) visit(arg)
