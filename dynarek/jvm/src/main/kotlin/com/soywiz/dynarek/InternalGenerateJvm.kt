@@ -120,6 +120,12 @@ class JvmGenerator(val log: Boolean) {
 				"*" -> _visitInsn(IMUL)
 				"/" -> _visitInsn(IDIV)
 				"%" -> _visitInsn(IREM)
+				"|" -> _visitInsn(IOR)
+				"&" -> _visitInsn(IAND)
+				"^" -> _visitInsn(IXOR)
+				"<<" -> _visitInsn(ISHL)
+				">>" -> _visitInsn(ISHR)
+				">>>" -> _visitInsn(IUSHR)
 				else -> TODO("Unsupported operator ${expr.op}")
 			}
 		}

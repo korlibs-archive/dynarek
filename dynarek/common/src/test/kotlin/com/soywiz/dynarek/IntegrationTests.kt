@@ -142,15 +142,26 @@ class IntegrationTests {
 
 	@Test
 	fun testFor() {
-		val function = function(DClass(State::class), DINT, DVOID) {
+		val function = function(DClass(State::class), DVOID) {
 			val n = DLocal(Int::class, 0.lit)
 			FOR(n, start = 3.lit, end = 10.lit) {
-				STM(State::log.invoke(p0, n))
+				STM(State::log.invoke(p0, -n))
 			}
 		}
-		val state = State(a = 7, b = 3)
-		function.generateDynarek()(state, 3)
+		val state = State()
+		function.generateDynarek()(state)
 
-		assertEquals(listOf(3, 4, 5, 6, 7, 8, 9), state.logList.toList())
+		assertEquals(listOf(-3, -4, -5, -6, -7, -8, -9), state.logList.toList())
+	}
+
+	@Test
+	fun testBitops() {
+		val function = function(DClass(State::class), DVOID) {
+			SET(p0[State::a], (1.lit or 2.lit or 4.lit).inv() and 0b011101011.lit)
+		}
+		val state = State()
+		function.generateDynarek()(state)
+
+		assertEquals((1 or 2 or 4).inv() and 0b011101011, state.a)
 	}
 }

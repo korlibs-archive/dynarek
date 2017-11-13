@@ -20,6 +20,7 @@ interface DExpr<T> : DNode
 data class DLiteral<T>(val value: T) : DExpr<T>
 data class DArg<T : Any>(val clazz: KClass<T>, val index: Int) : DExpr<T>
 data class DBinopInt(val left: DExpr<Int>, val op: String, val right: DExpr<Int>) : DExpr<Int>
+data class DBinopFloat(val left: DExpr<Float>, val op: String, val right: DExpr<Float>) : DExpr<Float>
 data class DBinopIntBool(val left: DExpr<Int>, val op: String, val right: DExpr<Int>) : DExpr<Boolean>
 class DLocal<T : Any>(val clazz: KClass<T>, val initialValue: DExpr<T>) : DRef<T>, DExpr<T>
 

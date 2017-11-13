@@ -1,10 +1,6 @@
 package com.soywiz.dynarek
 
-import kotlin.reflect.KClass
-import kotlin.reflect.KFunction1
-import kotlin.reflect.KFunction2
-import kotlin.reflect.KFunction3
-import kotlin.reflect.KMutableProperty1
+import kotlin.reflect.*
 
 class StmBuilder<TRet : Any, T0 : Any, T1 : Any>(val ret: KClass<TRet>, val t0: KClass<T0>, val t1: KClass<T1>) {
 	inner class ElseBuilder(val ifElse: DIfElse) {
@@ -29,6 +25,16 @@ class StmBuilder<TRet : Any, T0 : Any, T1 : Any>(val ret: KClass<TRet>, val t0: 
 	operator fun DExpr<Int>.times(that: DExpr<Int>) = DBinopInt(this, "*", that)
 	operator fun DExpr<Int>.div(that: DExpr<Int>) = DBinopInt(this, "/", that)
 	operator fun DExpr<Int>.rem(that: DExpr<Int>) = DBinopInt(this, "%", that)
+	operator fun DExpr<Int>.unaryMinus() = DBinopInt(DLiteral(0), "-", this)
+	operator fun DExpr<Int>.unaryPlus() = this
+
+	infix fun DExpr<Int>.and(that: DExpr<Int>) = DBinopInt(this, "&", that)
+	infix fun DExpr<Int>.or(that: DExpr<Int>) = DBinopInt(this, "|", that)
+	infix fun DExpr<Int>.xor(that: DExpr<Int>) = DBinopInt(this, "^", that)
+	infix fun DExpr<Int>.shl(that: DExpr<Int>) = DBinopInt(this, "<<", that)
+	infix fun DExpr<Int>.shr(that: DExpr<Int>) = DBinopInt(this, ">>", that)
+	infix fun DExpr<Int>.ushr(that: DExpr<Int>) = DBinopInt(this, ">>>", that)
+	fun DExpr<Int>.inv() = DBinopInt(this, "^", -1.lit)
 
 	infix fun DExpr<Int>.eq(that: DExpr<Int>) = DBinopIntBool(this, "==", that)
 	infix fun DExpr<Int>.ne(that: DExpr<Int>) = DBinopIntBool(this, "!=", that)

@@ -84,7 +84,8 @@ class JsGenerator(val func: DFunction, val log: Boolean = false) {
 external class JsFunction(vararg args: dynamic)
 
 fun _generateDynarek(nargs: Int, func: DFunction): dynamic {
-	val body = JsGenerator(func, log = false).generate()
+	val body = JsGenerator(func).generate()
+	//println(body)
 
 	// @TODO: Kotlin.JS: This produces syntax error!
 	//val argNames = (0 until nargs).map { "p$it" }.toTypedArray()
