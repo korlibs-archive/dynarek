@@ -164,4 +164,17 @@ class IntegrationTests {
 
 		assertEquals((1 or 2 or 4).inv() and 0b011101011, state.a)
 	}
+
+	@Test
+	fun testFloat() {
+		val function = function(DClass(State::class), DVOID) {
+			SET(p0[State::f0], 1f.lit)
+			SET(p0[State::f1], DBinopFloat(p0[State::f0], FBinop.ADD, 3f.lit))
+		}
+		val state = State()
+		function.generateDynarek()(state)
+
+		assertEquals(1f, state.f0)
+		assertEquals(4f, state.f1)
+	}
 }

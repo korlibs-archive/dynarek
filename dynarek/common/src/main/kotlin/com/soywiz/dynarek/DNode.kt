@@ -16,12 +16,25 @@ val DINT = DPrimType<Int>(Int::class, 1)
 val DFLOAT = DPrimType<Float>(Float::class, 2)
 val DBOOL = DPrimType<Boolean>(Boolean::class, 3)
 
+enum class IBinop(val op: String) {
+	ADD("+"), SUB("-"), MUL("*"), DIV("/"), REM("%"),
+	AND("&"), OR("|"), XOR("^"), SHL("<<"), SHR(">>"), USHR(">>>")
+}
+
+enum class FBinop(val op: String) {
+	ADD("+"), SUB("-"), MUL("*"), DIV("/"), REM("%")
+}
+
+enum class Compop(val op: String) {
+	EQ("=="), NE("!="), LT("<"), GT(">"), LE("<="), GE(">=")
+}
+
 interface DExpr<T> : DNode
 data class DLiteral<T>(val value: T) : DExpr<T>
 data class DArg<T : Any>(val clazz: KClass<T>, val index: Int) : DExpr<T>
-data class DBinopInt(val left: DExpr<Int>, val op: String, val right: DExpr<Int>) : DExpr<Int>
-data class DBinopFloat(val left: DExpr<Float>, val op: String, val right: DExpr<Float>) : DExpr<Float>
-data class DBinopIntBool(val left: DExpr<Int>, val op: String, val right: DExpr<Int>) : DExpr<Boolean>
+data class DBinopInt(val left: DExpr<Int>, val op: IBinop, val right: DExpr<Int>) : DExpr<Int>
+data class DBinopFloat(val left: DExpr<Float>, val op: FBinop, val right: DExpr<Float>) : DExpr<Float>
+data class DBinopIntBool(val left: DExpr<Int>, val op: Compop, val right: DExpr<Int>) : DExpr<Boolean>
 class DLocal<T : Any>(val clazz: KClass<T>, val initialValue: DExpr<T>) : DRef<T>, DExpr<T>
 
 interface DExprInvoke<TThis : Any, TR : Any> : DExpr<TR> {

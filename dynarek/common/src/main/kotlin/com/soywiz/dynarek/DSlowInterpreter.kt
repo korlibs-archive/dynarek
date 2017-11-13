@@ -9,8 +9,8 @@ class DSlowInterpreter(val args: List<*>, var retval: Any? = null) {
 			val l = interpret(node.left)
 			val r = interpret(node.right)
 			when (node.op) {
-				"+" -> (l + r) as T
-				"*" -> (l * r) as T
+				IBinop.ADD -> (l + r) as T
+				IBinop.MUL -> (l * r) as T
 				else -> TODO("Unknown op ${node.op}")
 			}
 		}

@@ -11,12 +11,12 @@ class JsGenerator(val func: DFunction, val log: Boolean = false) {
 			is DArg<*> -> "p$index"
 			is DBinopInt -> {
 				when (op) {
-					"*" -> "Math.imul(${left.str}, ${right.str})"
-					else -> "((${left.str} $op ${right.str})|0)"
+					IBinop.MUL -> "Math.imul(${left.str}, ${right.str})"
+					else -> "((${left.str} ${op.op} ${right.str})|0)"
 				}
-
 			}
-			is DBinopIntBool -> "((${left.str} $op ${right.str}))"
+			is DBinopFloat -> "Math.fround(${left.str} ${op.op} ${right.str})"
+			is DBinopIntBool -> "((${left.str} ${op.op} ${right.str}))"
 			is DFieldAccess<*, *> -> "${obj.str}.${prop.name}"
 			is DExprInvoke<*, *> -> {
 				val obj = this.args.first()

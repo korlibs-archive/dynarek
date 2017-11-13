@@ -29,6 +29,7 @@ open class DNodeVisitor {
 		is DArg<*> -> visit(node)
 		is DBinopInt -> visit(node)
 		is DBinopIntBool -> visit(node)
+		is DBinopFloat -> visit(node)
 		is DExprInvoke<*, *> -> visit(node)
 		is DFieldAccess<*, *> -> visit(node)
 		else -> TODO("Unsupported $node")
@@ -46,6 +47,11 @@ open class DNodeVisitor {
 	}
 
 	open fun visit(node: DBinopInt): Unit {
+		visit(node.left)
+		visit(node.right)
+	}
+
+	open fun visit(node: DBinopFloat): Unit {
 		visit(node.left)
 		visit(node.right)
 	}

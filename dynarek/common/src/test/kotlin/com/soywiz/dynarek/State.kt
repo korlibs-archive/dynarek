@@ -4,6 +4,10 @@ data class State(
 	@JvmField var a: Int = 0,
 	@JvmField var b: Int = 0
 ) {
+	@JvmField var f0: Float = 0f
+	@JvmField var f1: Float = 0f
+	@JvmField var f2: Float = 0f
+
 	val logList = arrayListOf<Int>()
 
 	@JsName("mulAB")

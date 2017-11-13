@@ -115,17 +115,29 @@ class JvmGenerator(val log: Boolean) {
 			visit(expr.left)
 			visit(expr.right)
 			when (expr.op) {
-				"+" -> _visitInsn(IADD)
-				"-" -> _visitInsn(ISUB)
-				"*" -> _visitInsn(IMUL)
-				"/" -> _visitInsn(IDIV)
-				"%" -> _visitInsn(IREM)
-				"|" -> _visitInsn(IOR)
-				"&" -> _visitInsn(IAND)
-				"^" -> _visitInsn(IXOR)
-				"<<" -> _visitInsn(ISHL)
-				">>" -> _visitInsn(ISHR)
-				">>>" -> _visitInsn(IUSHR)
+				IBinop.ADD -> _visitInsn(IADD)
+				IBinop.SUB -> _visitInsn(ISUB)
+				IBinop.MUL -> _visitInsn(IMUL)
+				IBinop.DIV -> _visitInsn(IDIV)
+				IBinop.REM -> _visitInsn(IREM)
+				IBinop.OR -> _visitInsn(IOR)
+				IBinop.AND -> _visitInsn(IAND)
+				IBinop.XOR -> _visitInsn(IXOR)
+				IBinop.SHL -> _visitInsn(ISHL)
+				IBinop.SHR -> _visitInsn(ISHR)
+				IBinop.USHR -> _visitInsn(IUSHR)
+				else -> TODO("Unsupported operator ${expr.op}")
+			}
+		}
+		is DBinopFloat -> {
+			visit(expr.left)
+			visit(expr.right)
+			when (expr.op) {
+				FBinop.ADD -> _visitInsn(FADD)
+				FBinop.SUB -> _visitInsn(FSUB)
+				FBinop.MUL -> _visitInsn(FMUL)
+				FBinop.DIV -> _visitInsn(FDIV)
+				FBinop.REM -> _visitInsn(FREM)
 				else -> TODO("Unsupported operator ${expr.op}")
 			}
 		}
@@ -133,12 +145,12 @@ class JvmGenerator(val log: Boolean) {
 			visit(expr.left)
 			visit(expr.right)
 			val opcode = when (expr.op) {
-				"==" -> IF_ICMPEQ
-				"!=" -> IF_ICMPNE
-				">=" -> IF_ICMPGE
-				">" -> IF_ICMPGT
-				"<=" -> IF_ICMPLE
-				"<" -> IF_ICMPLT
+				Compop.EQ -> IF_ICMPEQ
+				Compop.NE -> IF_ICMPNE
+				Compop.GE -> IF_ICMPGE
+				Compop.GT -> IF_ICMPGT
+				Compop.LE -> IF_ICMPLE
+				Compop.LT -> IF_ICMPLT
 				else -> TODO("Unsupported operator ${expr.op}")
 			}
 			val label1 = Label()
@@ -169,8 +181,7 @@ class JvmGenerator(val log: Boolean) {
 		is DLiteral<*> -> {
 			val value = expr.value
 			when (value) {
-				is Int -> _visitLdcInsn(value)
-				is Boolean -> _visitLdcInsn(value)
+				is Int, is Boolean, is Float -> _visitLdcInsn(value)
 				else -> TODO("MethodVisitor.visit: $expr")
 			}
 		}
