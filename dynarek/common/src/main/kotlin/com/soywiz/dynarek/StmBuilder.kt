@@ -24,8 +24,6 @@ class StmBuilder<TRet : Any, T0 : Any, T1 : Any>(val ret: KClass<TRet>, val t0: 
 	val p0 get() = DArg<T0>(t0, 0)
 	val p1 get() = DArg<T1>(t1, 1)
 
-	fun <T : Any> arg(clazz: KClass<T>, index: Int) = DArg<T>(clazz, index)
-
 	operator fun DExpr<Int>.plus(that: DExpr<Int>) = DBinopInt(this, "+", that)
 	operator fun DExpr<Int>.minus(that: DExpr<Int>) = DBinopInt(this, "-", that)
 	operator fun DExpr<Int>.times(that: DExpr<Int>) = DBinopInt(this, "*", that)

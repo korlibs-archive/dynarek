@@ -3,7 +3,7 @@ package com.soywiz.dynarek
 import org.junit.Test
 import kotlin.test.assertEquals
 
-class DrekTest {
+class IntegrationTests {
 	@Test
 	fun testInterpreter() {
 		val function = function(DClass(State::class), DINT, DVOID) {
@@ -126,5 +126,17 @@ class DrekTest {
 
 		assertEquals(1, state.a)
 		assertEquals(3, state.b)
+	}
+
+	@Test
+	fun testLocal() {
+		val function = function(DClass(State::class), DINT, DVOID) {
+			val local1 = DLocal(Int::class, 9.lit)
+			SET(local1, local1 * 7.lit)
+			SET(p0[State::a], local1)
+		}
+		val state = State(a = 7, b = 3)
+		function.generateDynarek()(state, 3)
+		assertEquals(9 * 7, state.a)
 	}
 }
