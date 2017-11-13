@@ -21,7 +21,7 @@ data class DLiteral<T>(val value: T) : DExpr<T>
 data class DArg<T : Any>(val clazz: KClass<T>, val index: Int) : DExpr<T>
 data class DBinopInt(val left: DExpr<Int>, val op: String, val right: DExpr<Int>) : DExpr<Int>
 data class DBinopIntBool(val left: DExpr<Int>, val op: String, val right: DExpr<Int>) : DExpr<Boolean>
-data class DLocal<T : Any>(val clazz: KClass<T>, val initialValue: DExpr<T>) : DRef<T>, DExpr<T>
+class DLocal<T : Any>(val clazz: KClass<T>, val initialValue: DExpr<T>) : DRef<T>, DExpr<T>
 
 interface DExprInvoke<TThis : Any, TR : Any> : DExpr<TR> {
 	val clazz: KClass<TThis>

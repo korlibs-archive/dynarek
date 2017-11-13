@@ -139,4 +139,18 @@ class IntegrationTests {
 		function.generateDynarek()(state, 3)
 		assertEquals(9 * 7, state.a)
 	}
+
+	@Test
+	fun testFor() {
+		val function = function(DClass(State::class), DINT, DVOID) {
+			val n = DLocal(Int::class, 0.lit)
+			FOR(n, start = 3.lit, end = 10.lit) {
+				STM(State::log.invoke(p0, n))
+			}
+		}
+		val state = State(a = 7, b = 3)
+		function.generateDynarek()(state, 3)
+
+		assertEquals(listOf(3, 4, 5, 6, 7, 8, 9), state.logList.toList())
+	}
 }

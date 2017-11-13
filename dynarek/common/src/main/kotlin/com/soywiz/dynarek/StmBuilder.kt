@@ -71,6 +71,14 @@ class StmBuilder<TRet : Any, T0 : Any, T1 : Any>(val ret: KClass<TRet>, val t0: 
 		stms.add(DWhile(cond, block.build()))
 	}
 
+	fun FOR(local: DLocal<Int>, start: DExpr<Int>, end: DExpr<Int>, block: StmBuilder<TRet, T0, T1>.() -> Unit): Unit {
+		SET(local, start)
+		WHILE(local lt end) {
+			block()
+			SET(local, local + 1.lit)
+		}
+	}
+
 	fun build(): DStm = DStms(stms.toList())
 }
 
