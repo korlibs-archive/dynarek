@@ -58,8 +58,8 @@ data class DExprInvoke3<TThis : Any, T1 : Any, T2 : Any, TR : Any>(override val 
 	override val args = listOf(p0, p1, p2)
 }
 
-interface DRef<T> : DNode
-data class DFieldAccess<T : Any, TR>(val clazz: KClass<T>, val obj: DExpr<T>, val prop: KMutableProperty1<T, TR>) : DExpr<TR>, DRef<TR>
+interface DRef<T> : DExpr<T>
+data class DFieldAccess<T : Any, TR>(val clazz: KClass<T>, val obj: DExpr<T>, val prop: KMutableProperty1<T, TR>) : DRef<TR>
 //data class DInstanceMethod1<T : Any, TR>(val clazz: KClass<T>, val obj: DExpr<T>, val prop: KFunction1<T, TR>)
 
 interface DStm : DNode
