@@ -8,6 +8,14 @@ data class State(
 	@JvmField var f1: Float = 0f
 	@JvmField var f2: Float = 0f
 
+	// Do not have @JvmField to use setter/getter
+	var c: Int = 0
+
+	private var _d: Int = 0
+
+	// Custom setter/getter
+	var d: Int get() = _d; set(value) = run { _d = value}
+
 	val logList = arrayListOf<Int>()
 
 	@JsName("mulAB")

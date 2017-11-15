@@ -7,6 +7,7 @@ import org.objectweb.asm.Opcodes.*
 import org.objectweb.asm.Type
 import java.lang.reflect.Field
 import java.lang.reflect.Method
+import java.lang.reflect.Modifier
 
 class JvmGenerator(val log: Boolean) {
 	var dynarekLastId = 0
@@ -36,9 +37,17 @@ class JvmGenerator(val log: Boolean) {
 
 	fun DFieldAccess<*, *>.getField(): Field {
 		val leftClazz = this.clazz.java
-		val field = leftClazz.getDeclaredField(prop.name)
-		field.isAccessible = true
-		return field
+		return leftClazz.getDeclaredField(prop.name)
+	}
+
+	fun Class<*>.tryGetMethodWithName(name: String) = this.declaredMethods.firstOrNull { it.name == name }
+
+	fun DFieldAccess<*, *>.tryGetGetterMethod(): Method? {
+		return this.clazz.java.tryGetMethodWithName("get" + prop.name.capitalize())
+	}
+
+	fun DFieldAccess<*, *>.tryGetSetterMethod(): Method? {
+		return this.clazz.java.tryGetMethodWithName("set" + prop.name.capitalize())
 	}
 
 	inline fun log(msgGen: () -> String) {
@@ -79,6 +88,14 @@ class JvmGenerator(val log: Boolean) {
 	fun MethodVisitor._visitMethodInsn(opcode: Int, owner: String, name: String, desc: String, itf: Boolean): Unit {
 		log { "visitMethodInsn(${jvmOpcodes[opcode]}, $owner, $name, $desc, $itf)" }
 		visitMethodInsn(opcode, owner, name, desc, itf)
+	}
+
+	fun MethodVisitor._visitMethodInsn(method: Method, clazz: Class<*> = method.declaringClass): Unit {
+		val opcode = when {
+			(method.modifiers and Modifier.STATIC) != 0 -> INVOKESTATIC
+			else -> INVOKEVIRTUAL
+		}
+		_visitMethodInsn(opcode, clazz.internalName, method.name, method.signature, false)
 	}
 
 	fun MethodVisitor._visitIntInsn(opcode: Int, v: Int): Unit {
@@ -164,7 +181,12 @@ class JvmGenerator(val log: Boolean) {
 		}
 		is DFieldAccess<*, *> -> {
 			visit(expr.obj)
-			_visitFieldInsn(GETFIELD, expr.getField())
+			val getterMethod = expr.tryGetGetterMethod()
+			if (getterMethod != null) {
+				_visitMethodInsn(getterMethod)
+			} else {
+				_visitFieldInsn(GETFIELD, expr.getField())
+			}
 		}
 		is DExprInvoke<*, *> -> {
 			val clazz = expr.clazz.java
@@ -172,7 +194,7 @@ class JvmGenerator(val log: Boolean) {
 			for (arg in expr.args) visit(arg)
 			val method = clazz.declaredMethods.firstOrNull { it.name == name } ?: throw IllegalArgumentException("Can't find method $clazz.$name")
 
-			_visitMethodInsn(INVOKEVIRTUAL, clazz.internalName, method.name, method.signature, false)
+			_visitMethodInsn(method, clazz)
 			if (method.returnType == Void.TYPE) {
 				visitInsn(ACONST_NULL)
 			}
@@ -199,7 +221,12 @@ class JvmGenerator(val log: Boolean) {
 				is DFieldAccess<*, *> -> {
 					visit(left.obj)
 					visit(right)
-					_visitFieldInsn(PUTFIELD, left.getField())
+					val setMethod = left.tryGetSetterMethod()
+					if (setMethod != null) {
+						_visitMethodInsn(setMethod)
+					} else {
+						_visitFieldInsn(PUTFIELD, left.getField())
+					}
 				}
 				is DLocal<*> -> {
 					visit(right)

@@ -177,4 +177,28 @@ class IntegrationTests {
 		assertEquals(1f, state.f0)
 		assertEquals(4f, state.f1)
 	}
+
+	@Test
+	fun testRawProperty() {
+		val function = function(DClass(State::class), DVOID) {
+			SET(p0[State::c], 1.lit)
+			SET(p0[State::c], p0[State::c] + 3.lit)
+		}
+		val state = State()
+		function.generateDynarek()(state)
+
+		assertEquals(4, state.c)
+	}
+
+	@Test
+	fun testGetterSetterProperty() {
+		val function = function(DClass(State::class), DVOID) {
+			SET(p0[State::d], 1.lit)
+			SET(p0[State::d], p0[State::d] + 3.lit)
+		}
+		val state = State()
+		function.generateDynarek()(state)
+
+		assertEquals(4, state.d)
+	}
 }
